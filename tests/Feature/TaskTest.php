@@ -70,4 +70,43 @@ class TaskTest extends TestCase
         $response->assertSee('Completed Task');
         $response->assertDontSee('Pending Task');
     }
+
+    public function test_user_can_search_tasks_by_keyword(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create(['user_id' => $user->id]);
+
+        Task::factory()->create([
+            'project_id' => $project->id,
+            'title' => 'Deploy to Staging Server',
+            'status' => 'Pending',
+        ]);
+
+        Task::factory()->create([
+            'project_id' => $project->id,
+            'title' => 'Fix CSS Layout Margins',
+            'status' => 'Pending',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('projects.show', [$project, 'search' => 'Staging']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Deploy to Staging Server');
+        $response->assertDontSee('Fix CSS Layout Margins');
+    }
+
+    public function test_tasks_are_paginated(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create(['user_id' => $user->id]);
+
+        Task::factory()->count(8)->create(['project_id' => $project->id]);
+
+        $response = $this->actingAs($user)->get(route('projects.show', $project));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('tasks', function ($tasks) {
+            return $tasks->count() === 5 && $tasks->total() === 8;
+        });
+    }
 }

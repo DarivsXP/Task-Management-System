@@ -14,13 +14,23 @@ class ProjectController extends Controller
 
     public function index(Request $request)
     {
-        $projects = $request->user()
+        $search = $request->query('search');
+
+        $projectsQuery = $request->user()
             ->projects()
             ->withCount('tasks')
-            ->latest()
-            ->get();
+            ->latest();
 
-        return view('projects.index', compact('projects'));
+        if ($search) {
+            $projectsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $projects = $projectsQuery->paginate(6)->withQueryString();
+
+        return view('projects.index', compact('projects', 'search'));
     }
 
     public function create()
@@ -41,6 +51,7 @@ class ProjectController extends Controller
         $this->authorize('view', $project);
 
         $statusFilter = $request->query('status');
+        $search = $request->query('search');
 
         $tasksQuery = $project->tasks()->latest();
 
@@ -48,12 +59,20 @@ class ProjectController extends Controller
             $tasksQuery->where('status', $statusFilter);
         }
 
-        $tasks = $tasksQuery->get();
+        if ($search) {
+            $tasksQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $tasks = $tasksQuery->paginate(5)->withQueryString();
 
         return view('projects.show', [
             'project' => $project,
             'tasks' => $tasks,
             'currentFilter' => $statusFilter,
+            'search' => $search,
         ]);
     }
 
