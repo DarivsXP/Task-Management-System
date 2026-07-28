@@ -1,235 +1,200 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('projects.index') }}" class="p-2.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('projects.index') }}" class="text-stone-400 hover:text-stone-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </a>
                 <div>
-                    <h2 class="font-extrabold text-2xl md:text-3xl text-slate-900 leading-tight">
-                        {{ $project->name }}
-                    </h2>
-                    <p class="text-sm font-medium text-slate-500 mt-1">
-                        Created on {{ $project->created_at->format('F d, Y \a\t h:i A') }}
-                    </p>
+                    <h2 class="font-display font-bold text-2xl text-stone-900 leading-tight">{{ $project->name }}</h2>
+                    <p class="text-sm text-stone-400 mt-0.5">Created {{ $project->created_at->format('M d, Y') }}</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold
+                    {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600' }}">
                     {{ $project->status }}
                 </span>
-                <a href="{{ route('projects.edit', $project) }}" class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
-                    Edit Project
+                <a href="{{ route('projects.edit', $project) }}" class="px-3 py-1.5 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+                    Edit
                 </a>
-                <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this project? All associated tasks will be permanently removed.');">
+                <form action="{{ route('projects.destroy', $project) }}" method="POST"
+                    onsubmit="return confirm('Delete this project and all its tasks?');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-50 border border-red-200 rounded-lg font-bold text-sm text-red-600 hover:bg-red-100 shadow-sm">
-                        Delete Project
+                    <button type="submit" class="px-3 py-1.5 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                        Delete
                     </button>
                 </form>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-5">
 
             @if (session('success'))
-                <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-lg shadow-sm">
-                    <p class="font-semibold text-base">{{ session('success') }}</p>
+                <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm font-medium">
+                    {{ session('success') }}
                 </div>
             @endif
 
-            <!-- Project Overview Card -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 p-6 md:p-8">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Project Description</h3>
-                <p class="text-slate-800 text-base md:text-lg whitespace-pre-line leading-relaxed">
-                    {{ $project->description ?: 'No detailed description provided for this project.' }}
-                </p>
-            </div>
+            <!-- Project Description -->
+            @if($project->description)
+                <div class="bg-white border border-stone-200 rounded-xl p-5">
+                    <p class="text-sm text-stone-400 font-semibold uppercase tracking-wider mb-1.5">Description</p>
+                    <p class="text-stone-700 leading-relaxed">{{ $project->description }}</p>
+                </div>
+            @endif
 
-            <!-- Task Management Section -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 p-6 md:p-8">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-6 border-b border-slate-200 mb-6 gap-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-900">Project Tasks</h3>
-                        <p class="text-sm font-medium text-slate-500">Manage tasks, search keywords, and filter by status.</p>
-                    </div>
+            <!-- Tasks Panel -->
+            <div class="bg-white border border-stone-200 rounded-xl">
 
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- Task Search Bar -->
-                        <form action="{{ route('projects.show', $project) }}" method="GET" class="flex items-center gap-2">
-                            @if(!empty($currentFilter))
-                                <input type="hidden" name="status" value="{{ $currentFilter }}">
-                            @endif
-                            <div class="relative flex-1">
-                                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search tasks..."
-                                    class="w-full sm:w-52 pl-9 pr-3 py-2 text-xs rounded-xl border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
+                <!-- Panel Header: Search + Filters -->
+                <div class="p-5 border-b border-stone-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <h3 class="font-display font-bold text-lg text-stone-900">Tasks</h3>
+                            <p class="text-sm text-stone-400">{{ $tasks->total() }} {{ Str::plural('task', $tasks->total()) }} in this project</p>
+                        </div>
+
+                        <!-- Search + Status Filter Row -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <!-- Task Search -->
+                            <form action="{{ route('projects.show', $project) }}" method="GET" class="flex items-center gap-2">
+                                @if(!empty($currentFilter))
+                                    <input type="hidden" name="status" value="{{ $currentFilter }}">
+                                @endif
+                                <input type="text" name="search" value="{{ $search ?? '' }}"
+                                    placeholder="Search tasks..."
+                                    class="w-44 px-3 py-1.5 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400 bg-white placeholder-stone-400">
+                                <button type="submit"
+                                    class="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition-colors whitespace-nowrap">
+                                    Search
+                                </button>
+                                @if(!empty($search))
+                                    <a href="{{ route('projects.show', [$project, 'status' => $currentFilter]) }}"
+                                        class="text-sm text-stone-500 hover:text-stone-800 font-medium">
+                                        Clear
+                                    </a>
+                                @endif
+                            </form>
+
+                            <!-- Status Filter -->
+                            <div class="flex items-center gap-1 bg-stone-100 p-1 rounded-lg">
+                                @foreach(['' => 'All', 'Pending' => 'Pending', 'In Progress' => 'In Progress', 'Completed' => 'Done'] as $value => $label)
+                                    <a href="{{ route('projects.show', array_filter(['project' => $project->id, 'status' => $value ?: null, 'search' => $search])) }}"
+                                        class="px-3 py-1 rounded-md text-xs font-semibold transition-all {{ ($currentFilter ?? '') === $value ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-800' }}">
+                                        {{ $label }}
+                                    </a>
+                                @endforeach
                             </div>
-                            <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 shadow-sm transition-all shrink-0">
-                                Search
-                            </button>
-                            @if(!empty($search))
-                                <a href="{{ route('projects.show', [$project, 'status' => $currentFilter]) }}" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 shrink-0">
-                                    Clear
-                                </a>
-                            @endif
-                        </form>
-
-                        <!-- Status Filter Tabs -->
-                        <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <a href="{{ route('projects.show', [$project, 'search' => $search]) }}"
-                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ empty($currentFilter) ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                All
-                            </a>
-                            <a href="{{ route('projects.show', [$project, 'status' => 'Pending', 'search' => $search]) }}"
-                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter === 'Pending' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                Pending
-                            </a>
-                            <a href="{{ route('projects.show', [$project, 'status' => 'In Progress', 'search' => $search]) }}"
-                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter === 'In Progress' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                In Progress
-                            </a>
-                            <a href="{{ route('projects.show', [$project, 'status' => 'Completed', 'search' => $search]) }}"
-                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter === 'Completed' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                Completed
-                            </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Create Task Form Component -->
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8">
-                    <h4 class="text-base font-bold text-slate-900 mb-4">+ Add New Task</h4>
+                <!-- Add Task Form -->
+                <div class="p-5 border-b border-stone-100 bg-stone-50">
+                    <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Add Task</p>
                     <form action="{{ route('projects.tasks.store', $project) }}" method="POST">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            <div class="md:col-span-4">
-                                <label for="title" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Task Title <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" id="title" value="{{ old('title') }}" placeholder="Task title..." required
-                                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 @error('title') border-red-500 @enderror">
+                        <div class="flex flex-col md:flex-row gap-3">
+                            <div class="flex-1">
+                                <input type="text" name="title" id="title" value="{{ old('title') }}"
+                                    placeholder="Task title *" required
+                                    class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400 @error('title') border-red-400 @enderror">
                                 @error('title')
-                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                                 @enderror
                             </div>
-
-                            <div class="md:col-span-3">
-                                <label for="description" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Description</label>
-                                <input type="text" name="description" id="description" value="{{ old('description') }}" placeholder="Optional details..."
-                                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 @error('description') border-red-500 @enderror">
-                                @error('description')
-                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                @enderror
+                            <div class="md:w-48">
+                                <input type="text" name="description" value="{{ old('description') }}"
+                                    placeholder="Description (optional)"
+                                    class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400">
                             </div>
-
-                            <div class="md:col-span-2">
-                                <label for="due_date" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Due Date</label>
-                                <input type="date" name="due_date" id="due_date" value="{{ old('due_date') }}"
-                                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 @error('due_date') border-red-500 @enderror">
-                                @error('due_date')
-                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                @enderror
+                            <div class="md:w-40">
+                                <input type="date" name="due_date" value="{{ old('due_date') }}"
+                                    class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400">
                             </div>
-
-                            <div class="md:col-span-2">
-                                <label for="status" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Status <span class="text-red-500">*</span></label>
-                                <select name="status" id="status" required
-                                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 @error('status') border-red-500 @enderror">
+                            <div class="md:w-36">
+                                <select name="status" class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400 bg-white">
                                     <option value="Pending">Pending</option>
                                     <option value="In Progress">In Progress</option>
                                     <option value="Completed">Completed</option>
                                 </select>
-                                @error('status')
-                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                @enderror
                             </div>
-
-                            <div class="md:col-span-1 flex items-end">
-                                <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm transition-colors">
-                                    Add
-                                </button>
-                            </div>
+                            <button type="submit"
+                                class="px-5 py-2 bg-stone-900 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition-colors whitespace-nowrap">
+                                Add Task
+                            </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tasks List -->
+                <!-- Task List -->
                 @if($tasks->isEmpty())
-                    <div class="text-center py-10 text-slate-500 text-base font-medium">
-                        {{ !empty($search) ? 'No tasks match your search criteria.' : 'No tasks found for this project.' }}
+                    <div class="p-10 text-center text-stone-400 text-sm">
+                        {{ !empty($search) ? 'No tasks matched your search.' : 'No tasks yet. Add one above.' }}
                     </div>
                 @else
-                    <div class="space-y-4">
+                    <ul class="divide-y divide-stone-100">
                         @foreach($tasks as $task)
-                            <div class="p-5 rounded-xl border border-slate-200 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 hover:shadow-sm transition-all">
-                                <div class="space-y-1.5 flex-1">
-                                    <div class="flex items-center space-x-3">
-                                        <h4 class="text-base font-bold text-slate-900 {{ $task->status === 'Completed' ? 'line-through text-slate-400' : '' }}">
+                            <li class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-stone-50 transition-colors">
+                                <!-- Task Info -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-medium text-stone-900 {{ $task->status === 'Completed' ? 'line-through text-stone-400' : '' }}">
                                             {{ $task->title }}
-                                        </h4>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider
-                                            {{ $task->status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : ($task->status === 'In Progress' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-amber-100 text-amber-800 border border-amber-200') }}">
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold
+                                            {{ $task->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : ($task->status === 'In Progress' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600') }}">
                                             {{ $task->status }}
                                         </span>
                                     </div>
                                     @if($task->description)
-                                        <p class="text-sm text-slate-600 leading-relaxed">{{ $task->description }}</p>
+                                        <p class="text-sm text-stone-400 mt-0.5 truncate">{{ $task->description }}</p>
                                     @endif
-                                    <div class="flex items-center space-x-4 text-xs font-semibold text-slate-400 pt-1">
-                                        @if($task->due_date)
-                                            <span class="flex items-center space-x-1.5 text-slate-500">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                                <span>Due: {{ $task->due_date->format('M d, Y') }}</span>
-                                            </span>
-                                        @else
-                                            <span>No due date</span>
-                                        @endif
-                                    </div>
+                                    @if($task->due_date)
+                                        <p class="text-xs text-stone-400 mt-0.5">Due {{ $task->due_date->format('M d, Y') }}</p>
+                                    @endif
                                 </div>
 
-                                <div class="flex items-center space-x-3 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                                    <!-- Quick Status Change Form -->
-                                    <form action="{{ route('tasks.updateStatus', $task) }}" method="POST" class="inline-block">
+                                <!-- Actions -->
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <!-- Inline Status Dropdown -->
+                                    <form action="{{ route('tasks.updateStatus', $task) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
                                         <select name="status" onchange="this.form.submit()"
-                                            class="text-xs font-bold py-1.5 px-3 rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50">
+                                            class="px-2.5 py-1.5 text-xs font-medium border border-stone-200 rounded-lg bg-white text-stone-700 focus:ring-stone-400 focus:border-stone-400 cursor-pointer">
                                             <option value="Pending" {{ $task->status === 'Pending' ? 'selected' : '' }}>Pending</option>
                                             <option value="In Progress" {{ $task->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
                                             <option value="Completed" {{ $task->status === 'Completed' ? 'selected' : '' }}>Completed</option>
                                         </select>
                                     </form>
 
-                                    <!-- Edit Task -->
-                                    <a href="{{ route('tasks.edit', $task) }}" class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">
+                                    <a href="{{ route('tasks.edit', $task) }}"
+                                        class="text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors">
                                         Edit
                                     </a>
 
-                                    <!-- Delete Task -->
-                                    <form action="{{ route('tasks.destroy', $task) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this task?');">
+                                    <form action="{{ route('tasks.destroy', $task) }}" method="POST"
+                                        onsubmit="return confirm('Delete this task?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">
+                                        <button type="submit"
+                                            class="text-xs font-medium text-red-400 hover:text-red-600 transition-colors">
                                             Delete
                                         </button>
                                     </form>
                                 </div>
-                            </div>
+                            </li>
                         @endforeach
-                    </div>
+                    </ul>
 
-                    <!-- Pagination Links -->
-                    <div class="pt-6">
+                    <div class="px-5 py-4 border-t border-stone-100">
                         {{ $tasks->links() }}
                     </div>
                 @endif

@@ -1,102 +1,95 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <h2 class="font-extrabold text-2xl md:text-3xl text-slate-900 leading-tight">
-                {{ __('Projects Dashboard') }}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <h2 class="font-display font-bold text-2xl text-stone-900">
+                Projects
             </h2>
-            <a href="{{ route('projects.create') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 border border-transparent rounded-xl font-bold text-sm text-white hover:bg-indigo-700 shadow-sm transition ease-in-out duration-150">
-                + Create New Project
+            <a href="{{ route('projects.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-700 transition-colors">
+                + New Project
             </a>
         </div>
     </x-slot>
 
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-5">
+
             @if (session('success'))
-                <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-xl shadow-sm">
-                    <p class="font-semibold text-base">{{ session('success') }}</p>
+                <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm font-medium">
+                    {{ session('success') }}
                 </div>
             @endif
 
-            <!-- Search Bar Component -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <form action="{{ route('projects.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
-                    <div class="relative flex-1 w-full">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search projects by name or description..."
-                            class="block w-full pl-10 pr-4 py-2.5 border-slate-300 rounded-xl text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
-                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 shadow-sm transition-all">
-                            Search
-                        </button>
-                        @if(!empty($search))
-                            <a href="{{ route('projects.index') }}" class="w-full sm:w-auto px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm text-center hover:bg-slate-200 transition-colors">
-                                Clear
-                            </a>
-                        @endif
-                    </div>
-                </form>
-            </div>
+            <!-- Search Bar -->
+            <form action="{{ route('projects.index') }}" method="GET">
+                <div class="flex items-center gap-2">
+                    <input type="text" name="search" value="{{ $search ?? '' }}"
+                        placeholder="Search projects by name or description..."
+                        class="flex-1 px-4 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400 bg-white placeholder-stone-400">
+                    <button type="submit"
+                        class="px-4 py-2 bg-stone-900 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition-colors whitespace-nowrap">
+                        Search
+                    </button>
+                    @if(!empty($search))
+                        <a href="{{ route('projects.index') }}"
+                            class="px-4 py-2 border border-stone-300 text-stone-600 rounded-lg text-sm font-medium hover:bg-stone-100 transition-colors whitespace-nowrap">
+                            Clear
+                        </a>
+                    @endif
+                </div>
+            </form>
 
             @if($projects->isEmpty())
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-12 text-center border border-slate-200">
-                    <svg class="mx-auto h-16 w-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                    </svg>
-                    <h3 class="mt-4 text-xl font-bold text-slate-900">
-                        {{ !empty($search) ? 'No matching projects found' : 'No projects created yet' }}
-                    </h3>
-                    <p class="mt-2 text-base text-slate-500">
-                        {{ !empty($search) ? 'Try adjusting your search terms.' : 'Get started by creating your first project to organize and track tasks.' }}
+                <div class="bg-white border border-stone-200 rounded-xl p-12 text-center">
+                    <p class="text-stone-500 font-medium text-base mb-1">
+                        {{ !empty($search) ? 'No projects matched "' . $search . '"' : 'No projects yet' }}
                     </p>
-                    <div class="mt-6">
-                        @if(!empty($search))
-                            <a href="{{ route('projects.index') }}" class="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 shadow-sm">
-                                Clear Search Filter
-                            </a>
-                        @else
-                            <a href="{{ route('projects.create') }}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-base hover:bg-indigo-700 shadow-sm">
-                                Create Your First Project
-                            </a>
-                        @endif
-                    </div>
+                    <p class="text-stone-400 text-sm mb-5">
+                        {{ !empty($search) ? 'Try different search terms.' : 'Create your first project to start tracking tasks.' }}
+                    </p>
+                    @if(!empty($search))
+                        <a href="{{ route('projects.index') }}" class="inline-flex items-center px-4 py-2 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-700">
+                            Clear Search
+                        </a>
+                    @else
+                        <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-700">
+                            Create Project
+                        </a>
+                    @endif
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     @foreach($projects as $project)
-                        <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all">
-                            <div class="p-6">
-                                <div class="flex justify-between items-start mb-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
+                        <div class="bg-white border border-stone-200 rounded-xl flex flex-col hover:border-stone-300 hover:shadow-sm transition-all">
+                            <div class="p-5 flex-1">
+                                <div class="flex items-start justify-between mb-3">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold
+                                        {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600' }}">
                                         {{ $project->status }}
                                     </span>
-                                    <span class="text-xs font-medium text-slate-400">Created {{ $project->created_at->format('M d, Y') }}</span>
+                                    <span class="text-xs text-stone-400">{{ $project->created_at->format('M d, Y') }}</span>
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-900 mb-2">
-                                    <a href="{{ route('projects.show', $project) }}" class="hover:text-indigo-600 transition-colors">
+                                <h3 class="font-display font-bold text-lg text-stone-900 mb-1.5 leading-snug">
+                                    <a href="{{ route('projects.show', $project) }}" class="hover:text-stone-600 transition-colors">
                                         {{ $project->name }}
                                     </a>
                                 </h3>
-                                <p class="text-slate-600 text-base mb-4 line-clamp-3 leading-relaxed">
-                                    {{ $project->description ?: 'No detailed description provided.' }}
+                                <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed">
+                                    {{ $project->description ?: 'No description provided.' }}
                                 </p>
                             </div>
-                            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-between items-center">
-                                <span class="text-sm font-bold text-slate-500">
-                                    {{ $project->tasks_count }} {{ Str::plural('Task', $project->tasks_count) }}
+                            <div class="px-5 py-3 border-t border-stone-100 flex items-center justify-between">
+                                <span class="text-xs text-stone-400 font-medium">
+                                    {{ $project->tasks_count }} {{ Str::plural('task', $project->tasks_count) }}
                                 </span>
-                                <div class="flex items-center space-x-2">
-                                    <a href="{{ route('projects.show', $project) }}" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors">View</a>
-                                    <a href="{{ route('projects.edit', $project) }}" class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md text-xs font-bold hover:bg-slate-200 transition-colors">Edit</a>
-                                    <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this project and all its tasks?');">
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('projects.show', $project) }}" class="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors">View</a>
+                                    <span class="text-stone-200">·</span>
+                                    <a href="{{ route('projects.edit', $project) }}" class="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors">Edit</a>
+                                    <span class="text-stone-200">·</span>
+                                    <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Delete this project and all its tasks?');" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-md text-xs font-bold hover:bg-red-100 transition-colors">Delete</button>
+                                        <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -104,8 +97,7 @@
                     @endforeach
                 </div>
 
-                <!-- Pagination Links -->
-                <div class="pt-4">
+                <div class="pt-2">
                     {{ $projects->links() }}
                 </div>
             @endif
