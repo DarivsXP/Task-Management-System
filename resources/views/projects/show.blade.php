@@ -8,8 +8,8 @@
                     </svg>
                 </a>
                 <div>
-                    <h2 class="font-display font-bold text-2xl text-stone-900 leading-tight">{{ $project->name }}</h2>
-                    <p class="text-sm text-stone-400 mt-0.5">Created {{ $project->created_at->format('M d, Y') }}</p>
+                    <h2 class="font-display font-bold text-3xl text-stone-900 leading-tight">{{ $project->name }}</h2>
+                    <p class="text-base text-stone-400 mt-0.5">Created {{ $project->created_at->format('M d, Y') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -56,7 +56,7 @@
                 <div class="p-5 border-b border-stone-100">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                            <h3 class="font-display font-bold text-lg text-stone-900">Tasks</h3>
+                            <h3 class="font-display font-bold text-xl text-stone-900">Tasks</h3>
                             <p class="text-sm text-stone-400">{{ $tasks->total() }} {{ Str::plural('task', $tasks->total()) }} in this project</p>
                         </div>
 
@@ -145,7 +145,7 @@
                                 <!-- Task Info -->
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-medium text-stone-900 {{ $task->status === 'Completed' ? 'line-through text-stone-400' : '' }}">
+                                        <span class="font-semibold text-base text-stone-900 {{ $task->status === 'Completed' ? 'line-through text-stone-400' : '' }}">
                                             {{ $task->title }}
                                         </span>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold
@@ -154,7 +154,7 @@
                                         </span>
                                     </div>
                                     @if($task->description)
-                                        <p class="text-sm text-stone-400 mt-0.5 truncate">{{ $task->description }}</p>
+                                        <p class="text-sm text-stone-500 mt-0.5 truncate">{{ $task->description }}</p>
                                     @endif
                                     @if($task->due_date)
                                         <p class="text-xs text-stone-400 mt-0.5">Due {{ $task->due_date->format('M d, Y') }}</p>
@@ -163,12 +163,12 @@
 
                                 <!-- Actions -->
                                 <div class="flex items-center gap-3 shrink-0">
-                                    <!-- Inline Status Dropdown -->
+                                    <!-- Inline Status Dropdown - fixed width so long options don't expand the row -->
                                     <form action="{{ route('tasks.updateStatus', $task) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
                                         <select name="status" onchange="this.form.submit()"
-                                            class="px-2.5 py-1.5 text-xs font-medium border border-stone-200 rounded-lg bg-white text-stone-700 focus:ring-stone-400 focus:border-stone-400 cursor-pointer">
+                                            class="w-32 px-2 py-1.5 text-xs font-medium border border-stone-200 rounded-lg bg-white text-stone-700 focus:ring-stone-400 focus:border-stone-400 cursor-pointer truncate">
                                             <option value="Pending" {{ $task->status === 'Pending' ? 'selected' : '' }}>Pending</option>
                                             <option value="In Progress" {{ $task->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
                                             <option value="Completed" {{ $task->status === 'Completed' ? 'selected' : '' }}>Completed</option>

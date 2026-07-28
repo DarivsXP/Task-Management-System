@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <h2 class="font-display font-bold text-2xl text-stone-900">
+            <h2 class="font-display font-bold text-3xl text-stone-900">
                 Projects
             </h2>
             <a href="{{ route('projects.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-stone-900 text-white rounded-lg font-medium text-sm hover:bg-stone-700 transition-colors">
@@ -68,12 +68,12 @@
                                     </span>
                                     <span class="text-xs text-stone-400">{{ $project->created_at->format('M d, Y') }}</span>
                                 </div>
-                                <h3 class="font-display font-bold text-lg text-stone-900 mb-1.5 leading-snug">
+                                <h3 class="font-display font-bold text-xl text-stone-900 mb-1.5 leading-snug">
                                     <a href="{{ route('projects.show', $project) }}" class="hover:text-stone-600 transition-colors">
                                         {{ $project->name }}
                                     </a>
                                 </h3>
-                                <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed">
+                                <p class="text-stone-500 text-base line-clamp-2 leading-relaxed">
                                     {{ $project->description ?: 'No description provided.' }}
                                 </p>
                             </div>
