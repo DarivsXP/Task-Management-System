@@ -61,24 +61,24 @@
 
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <!-- Task Search Bar -->
-                        <form action="{{ route('projects.show', $project) }}" method="GET" class="flex items-center space-x-2">
+                        <form action="{{ route('projects.show', $project) }}" method="GET" class="flex items-center gap-2">
                             @if(!empty($currentFilter))
                                 <input type="hidden" name="status" value="{{ $currentFilter }}">
                             @endif
-                            <div class="relative">
+                            <div class="relative flex-1">
                                 <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search tasks..."
-                                    class="w-full sm:w-48 pl-8 pr-3 py-1.5 text-xs rounded-lg border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
-                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-full sm:w-52 pl-9 pr-3 py-2 text-xs rounded-xl border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                     </svg>
                                 </div>
                             </div>
-                            <button type="submit" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition-colors">
+                            <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 shadow-sm transition-all shrink-0">
                                 Search
                             </button>
                             @if(!empty($search))
-                                <a href="{{ route('projects.show', [$project, 'status' => $currentFilter]) }}" class="px-2.5 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200">
+                                <a href="{{ route('projects.show', [$project, 'status' => $currentFilter]) }}" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 shrink-0">
                                     Clear
                                 </a>
                             @endif

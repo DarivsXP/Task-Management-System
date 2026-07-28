@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $demoUser = User::factory()->create([
             'name' => 'Demo User',
             'email' => 'demo@example.com',
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ]);
 
         $project1 = Project::create([
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
         $otherUser = User::factory()->create([
             'name' => 'John Doe',
             'email' => 'john@example.com',
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ]);
 
         Project::factory()->has(Task::factory()->count(3))->create([
