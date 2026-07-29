@@ -59,6 +59,12 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     @foreach($projects as $project)
+                        @php
+            $total     = $project->tasks_count;
+            $completed = $project->completed_tasks_count;
+            $overdue   = $project->overdue_tasks_count;
+            $percent   = $total > 0 ? round(($completed / $total) * 100) : 0;
+        @endphp
                         <div class="bg-white border border-stone-200 rounded-xl flex flex-col hover:border-stone-300 hover:shadow-sm transition-all">
                             <div class="p-5 flex-1">
                                 <div class="flex items-start justify-between mb-3">
@@ -66,25 +72,53 @@
                                         {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600' }}">
                                         {{ $project->status }}
                                     </span>
-                                    <span class="text-xs text-stone-400">{{ $project->created_at->format('M d, Y') }}</span>
+                                    <div class="flex items-center gap-1.5">
+                                        @if($overdue > 0)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                {{ $overdue }} overdue
+                                            </span>
+                                        @endif
+                                        <span class="text-xs text-stone-400">{{ $project->created_at->format('M d, Y') }}</span>
+                                    </div>
                                 </div>
+
                                 <h3 class="font-display font-bold text-xl text-stone-900 mb-1.5 leading-snug">
                                     <a href="{{ route('projects.show', $project) }}" class="hover:text-stone-600 transition-colors">
                                         {{ $project->name }}
                                     </a>
                                 </h3>
-                                <p class="text-stone-500 text-base line-clamp-2 leading-relaxed">
+                                <p class="text-stone-500 text-base line-clamp-2 leading-relaxed mb-4">
                                     {{ $project->description ?: 'No description provided.' }}
                                 </p>
+
+                                <!-- Progress Indicator -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-medium text-stone-500">Progress</span>
+                                        <span class="text-xs font-semibold text-stone-700">{{ $percent }}%
+                                            <span class="font-normal text-stone-400">({{ $completed }}/{{ $total }} tasks)</span>
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-stone-100 rounded-full h-1.5">
+                                        <div class="h-1.5 rounded-full transition-all duration-500
+                                            {{ $percent === 100 ? 'bg-emerald-500' : 'bg-stone-700' }}"
+                                            style="width: {{ $percent }}%">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="px-5 py-3 border-t border-stone-100 flex items-center justify-between">
-                                <span class="text-xs text-stone-400 font-medium">
-                                    {{ $project->tasks_count }} {{ Str::plural('task', $project->tasks_count) }}
-                                </span>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('projects.show', $project) }}" class="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors">View</a>
                                     <span class="text-stone-200">·</span>
                                     <a href="{{ route('projects.edit', $project) }}" class="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors">Edit</a>
+                                    <span class="text-stone-200">·</span>
+                                    <form action="{{ route('projects.duplicate', $project) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-xs font-medium text-stone-600 hover:text-stone-900 transition-colors">Duplicate</button>
+                                    </form>
                                     <span class="text-stone-200">·</span>
                                     <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Delete this project and all its tasks?');" class="inline">
                                         @csrf
