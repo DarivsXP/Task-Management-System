@@ -20,7 +20,7 @@ class ProjectController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $today = now()->toDateString();
+        $now = now()->toDateTimeString();
 
         $projects = $request->user()
             ->projects()
@@ -29,7 +29,7 @@ class ProjectController extends Controller
             ->withCount(['tasks as overdue_tasks_count' => fn ($q) => $q
                 ->where('status', '!=', 'Completed')
                 ->whereNotNull('due_date')
-                ->where('due_date', '<', $today)
+                ->where('due_date', '<', $now)
             ])
             ->latest()
             ->get();
@@ -69,7 +69,7 @@ class ProjectController extends Controller
             'tasks as overdue_tasks_count'   => fn ($q) => $q
                 ->where('status', '!=', 'Completed')
                 ->whereNotNull('due_date')
-                ->where('due_date', '<', now()->toDateString()),
+                ->where('due_date', '<', now()->toDateTimeString()),
         ]);
 
         return new ProjectResource($project);

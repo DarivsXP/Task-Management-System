@@ -139,8 +139,8 @@
                                     placeholder="Description (optional)"
                                     class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400">
                             </div>
-                            <div class="md:w-40">
-                                <input type="date" name="due_date" value="{{ old('due_date') }}"
+                            <div class="md:w-52">
+                                <input type="datetime-local" name="due_date" value="{{ old('due_date') }}"
                                     class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-stone-400 focus:border-stone-400">
                             </div>
                             <div class="md:w-36">
@@ -195,7 +195,7 @@
                                     @endif
                                     @if($task->due_date)
                                         <p class="text-xs mt-0.5 font-{{ $isOverdue ? 'semibold' : 'normal' }} {{ $isOverdue ? 'text-red-600' : 'text-stone-400' }}">
-                                            Due {{ $task->due_date->format('M d, Y') }}
+                                            Due {{ $task->due_date->format('M d, Y, g:i A') }}
                                             @if($isOverdue)
                                                 &mdash; {{ $task->due_date->diffForHumans() }}
                                             @endif

@@ -32,10 +32,10 @@
                         @enderror
                     </div>
 
-                    <!-- Due Date -->
+                    <!-- Due Date & Time -->
                     <div class="mb-6">
-                        <label for="due_date" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Due Date</label>
-                        <input type="date" name="due_date" id="due_date" value="{{ old('due_date', optional($task->due_date)->format('Y-m-d')) }}"
+                        <label for="due_date" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Due Date & Time</label>
+                        <input type="datetime-local" name="due_date" id="due_date" value="{{ old('due_date', optional($task->due_date)->format('Y-m-d\TH:i')) }}"
                             class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 @error('due_date') border-red-500 @enderror">
                         @error('due_date')
                             <p class="mt-1.5 text-xs font-semibold text-red-600">{{ $message }}</p>

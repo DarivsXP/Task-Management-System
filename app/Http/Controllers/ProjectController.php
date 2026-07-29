@@ -25,7 +25,7 @@ class ProjectController extends Controller
             ->withCount(['tasks as overdue_tasks_count' => function ($q) {
                 $q->where('status', '!=', 'Completed')
                   ->whereNotNull('due_date')
-                  ->where('due_date', '<', now()->toDateString());
+                  ->where('due_date', '<', now());
             }])
             ->latest();
 
@@ -66,7 +66,7 @@ class ProjectController extends Controller
         $completedTasks = $project->tasks()->where('status', 'Completed')->count();
         $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
 
-        $today = now()->toDateString();
+        $now = now()->toDateTimeString();
 
         $tasksQuery = $project->tasks()
             // Overdue tasks (non-completed, past due date) sort first
@@ -75,14 +75,14 @@ class ProjectController extends Controller
                     WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN 0
                     ELSE 1
                 END ASC
-            ", [$today])
+            ", [$now])
             // Within overdue group: most overdue (earliest due_date) first
             ->orderByRaw("
                 CASE
                     WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN due_date
                     ELSE NULL
                 END ASC
-            ", [$today])
+            ", [$now])
             // Everything else: newest first
             ->latest();
 

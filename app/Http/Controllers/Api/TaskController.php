@@ -23,15 +23,15 @@ class TaskController extends Controller
     {
         $this->authorize('view', $project);
 
-        $today = now()->toDateString();
+        $now = now()->toDateTimeString();
 
         $tasks = $project->tasks()
             ->orderByRaw("
                 CASE WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN 0 ELSE 1 END ASC
-            ", [$today])
+            ", [$now])
             ->orderByRaw("
                 CASE WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN due_date ELSE NULL END ASC
-            ", [$today])
+            ", [$now])
             ->latest()
             ->get();
 
