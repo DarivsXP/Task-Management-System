@@ -18,8 +18,8 @@
     <body class="font-sans text-stone-900 antialiased bg-stone-50 min-h-screen flex flex-col">
         <div class="flex-1 flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-stone-50">
             <div class="mb-6">
-                <a href="/" class="flex items-center">
-                    <span class="font-display text-2xl font-extrabold text-stone-900 tracking-tight">Task<span class="text-indigo-600">Sys</span></span>
+                <a href="/" class="font-display text-xl font-bold text-stone-900 tracking-tight">
+                    Task Management System
                 </a>
             </div>
 

@@ -17,6 +17,12 @@
                     {{ $project->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600' }}">
                     {{ $project->status }}
                 </span>
+                <form action="{{ route('projects.duplicate', $project) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="px-3 py-1.5 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+                        Duplicate
+                    </button>
+                </form>
                 <a href="{{ route('projects.edit', $project) }}" class="px-3 py-1.5 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
                     Edit
                 </a>
@@ -42,6 +48,25 @@
             @endif
 
             <!-- Project Description -->
+            <!-- Progress Bar -->
+            <div class="bg-white border border-stone-200 rounded-xl p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-stone-700">Project Progress</span>
+                    <span class="text-sm font-bold text-stone-900">{{ $progressPercent }}%
+                        <span class="font-normal text-stone-400 text-xs">{{ $completedTasks }}/{{ $totalTasks }} tasks completed</span>
+                    </span>
+                </div>
+                <div class="w-full bg-stone-100 rounded-full h-2">
+                    <div class="h-2 rounded-full transition-all duration-700
+                        {{ $progressPercent === 100 ? 'bg-emerald-500' : 'bg-stone-800' }}"
+                        style="width: {{ $progressPercent }}%">
+                    </div>
+                </div>
+                @if($progressPercent === 100)
+                    <p class="text-xs text-emerald-600 font-medium mt-2">All tasks completed!</p>
+                @endif
+            </div>
+
             @if($project->description)
                 <div class="bg-white border border-stone-200 rounded-xl p-5">
                     <p class="text-sm text-stone-400 font-semibold uppercase tracking-wider mb-1.5">Description</p>
@@ -141,23 +166,40 @@
                 @else
                     <ul class="divide-y divide-stone-100">
                         @foreach($tasks as $task)
-                            <li class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-stone-50 transition-colors">
+                            @php
+                                $isOverdue = $task->due_date
+                                    && $task->status !== 'Completed'
+                                    && $task->due_date->isPast();
+                            @endphp
+                            <li class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 transition-colors
+                                {{ $isOverdue ? 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400' : 'hover:bg-stone-50' }}">
                                 <!-- Task Info -->
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-semibold text-base text-stone-900 {{ $task->status === 'Completed' ? 'line-through text-stone-400' : '' }}">
+                                        <span class="font-semibold text-base {{ $task->status === 'Completed' ? 'line-through text-stone-400' : 'text-stone-900' }}">
                                             {{ $task->title }}
                                         </span>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold
                                             {{ $task->status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : ($task->status === 'In Progress' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600') }}">
                                             {{ $task->status }}
                                         </span>
+                                        @if($isOverdue)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                Overdue
+                                            </span>
+                                        @endif
                                     </div>
                                     @if($task->description)
                                         <p class="text-sm text-stone-500 mt-0.5 truncate">{{ $task->description }}</p>
                                     @endif
                                     @if($task->due_date)
-                                        <p class="text-xs text-stone-400 mt-0.5">Due {{ $task->due_date->format('M d, Y') }}</p>
+                                        <p class="text-xs mt-0.5 font-{{ $isOverdue ? 'semibold' : 'normal' }} {{ $isOverdue ? 'text-red-600' : 'text-stone-400' }}">
+                                            Due {{ $task->due_date->format('M d, Y') }}
+                                            @if($isOverdue)
+                                                &mdash; {{ $task->due_date->diffForHumans() }}
+                                            @endif
+                                        </p>
                                     @endif
                                 </div>
 
@@ -168,7 +210,8 @@
                                         @csrf
                                         @method('PATCH')
                                         <select name="status" onchange="this.form.submit()"
-                                            class="w-32 px-2 py-1.5 text-xs font-medium border border-stone-200 rounded-lg bg-white text-stone-700 focus:ring-stone-400 focus:border-stone-400 cursor-pointer truncate">
+                                            class="w-32 px-2 py-1.5 text-xs font-medium border rounded-lg bg-white text-stone-700 focus:ring-stone-400 focus:border-stone-400 cursor-pointer truncate
+                                                {{ $isOverdue ? 'border-red-300' : 'border-stone-200' }}">
                                             <option value="Pending" {{ $task->status === 'Pending' ? 'selected' : '' }}>Pending</option>
                                             <option value="In Progress" {{ $task->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
                                             <option value="Completed" {{ $task->status === 'Completed' ? 'selected' : '' }}>Completed</option>

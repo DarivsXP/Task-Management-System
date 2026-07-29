@@ -14,7 +14,7 @@
     <body class="font-sans antialiased bg-stone-50 text-stone-900 min-h-screen flex flex-col">
         <!-- Nav -->
         <header class="w-full max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-            <span class="font-display text-xl font-extrabold text-stone-900 tracking-tight">Task<span class="text-indigo-600">Sys</span></span>
+            <span class="font-display text-lg font-bold text-stone-900 tracking-tight">Task Management System</span>
             @if (Route::has('login'))
                 <nav class="flex items-center gap-3">
                     @auth
