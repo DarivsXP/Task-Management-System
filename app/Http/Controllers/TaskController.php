@@ -39,6 +39,8 @@ class TaskController extends Controller
 
         $task->update($request->validated());
 
+        $this->autoCompleteProject($task->project);
+
         return redirect()->route('projects.show', $task->project_id)
             ->with('success', 'Task updated successfully!');
     }
@@ -53,6 +55,8 @@ class TaskController extends Controller
 
         $task->update(['status' => $validated['status']]);
 
+        $this->autoCompleteProject($task->project);
+
         return redirect()->back()->with('success', 'Task status updated!');
     }
 
@@ -60,10 +64,32 @@ class TaskController extends Controller
     {
         $this->authorize('delete', $task);
 
-        $projectId = $task->project_id;
+        $project = $task->project;
         $task->delete();
 
-        return redirect()->route('projects.show', $projectId)
+        $this->autoCompleteProject($project);
+
+        return redirect()->route('projects.show', $project->id)
             ->with('success', 'Task deleted successfully!');
+    }
+
+    /**
+     * Automatically mark a project as Completed if all its tasks are completed.
+     * Reverts to Active if any task is not completed (or there are no tasks).
+     */
+    private function autoCompleteProject(\App\Models\Project $project): void
+    {
+        $totalTasks     = $project->tasks()->count();
+        $completedTasks = $project->tasks()->where('status', 'Completed')->count();
+
+        if ($totalTasks > 0 && $completedTasks === $totalTasks) {
+            if ($project->status !== 'Completed') {
+                $project->update(['status' => 'Completed']);
+            }
+        } else {
+            if ($project->status === 'Completed') {
+                $project->update(['status' => 'Active']);
+            }
+        }
     }
 }

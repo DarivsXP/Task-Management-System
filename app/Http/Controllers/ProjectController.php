@@ -19,6 +19,14 @@ class ProjectController extends Controller
         $projectsQuery = $request->user()
             ->projects()
             ->withCount('tasks')
+            ->withCount(['tasks as completed_tasks_count' => function ($q) {
+                $q->where('status', 'Completed');
+            }])
+            ->withCount(['tasks as overdue_tasks_count' => function ($q) {
+                $q->where('status', '!=', 'Completed')
+                  ->whereNotNull('due_date')
+                  ->where('due_date', '<', now()->toDateString());
+            }])
             ->latest();
 
         if ($search) {
@@ -51,9 +59,32 @@ class ProjectController extends Controller
         $this->authorize('view', $project);
 
         $statusFilter = $request->query('status');
-        $search = $request->query('search');
+        $search       = $request->query('search');
 
-        $tasksQuery = $project->tasks()->latest();
+        // Progress stats (always on full task list, not filtered)
+        $totalTasks     = $project->tasks()->count();
+        $completedTasks = $project->tasks()->where('status', 'Completed')->count();
+        $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+        $today = now()->toDateString();
+
+        $tasksQuery = $project->tasks()
+            // Overdue tasks (non-completed, past due date) sort first
+            ->orderByRaw("
+                CASE
+                    WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN 0
+                    ELSE 1
+                END ASC
+            ", [$today])
+            // Within overdue group: most overdue (earliest due_date) first
+            ->orderByRaw("
+                CASE
+                    WHEN status != 'Completed' AND due_date IS NOT NULL AND due_date < ? THEN due_date
+                    ELSE NULL
+                END ASC
+            ", [$today])
+            // Everything else: newest first
+            ->latest();
 
         if ($statusFilter && in_array($statusFilter, ['Pending', 'In Progress', 'Completed'])) {
             $tasksQuery->where('status', $statusFilter);
@@ -69,10 +100,13 @@ class ProjectController extends Controller
         $tasks = $tasksQuery->paginate(5)->withQueryString();
 
         return view('projects.show', [
-            'project' => $project,
-            'tasks' => $tasks,
-            'currentFilter' => $statusFilter,
-            'search' => $search,
+            'project'         => $project,
+            'tasks'           => $tasks,
+            'currentFilter'   => $statusFilter,
+            'search'          => $search,
+            'totalTasks'      => $totalTasks,
+            'completedTasks'  => $completedTasks,
+            'progressPercent' => $progressPercent,
         ]);
     }
 
@@ -101,5 +135,30 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.index')
             ->with('success', 'Project deleted successfully!');
+    }
+
+    public function duplicate(Project $project, Request $request)
+    {
+        $this->authorize('view', $project);
+
+        // Clone the project
+        $copy = $request->user()->projects()->create([
+            'name'        => $project->name . ' (Copy)',
+            'description' => $project->description,
+            'status'      => $project->status,
+        ]);
+
+        // Clone all tasks
+        foreach ($project->tasks as $task) {
+            $copy->tasks()->create([
+                'title'       => $task->title,
+                'description' => $task->description,
+                'status'      => $task->status,
+                'due_date'    => $task->due_date,
+            ]);
+        }
+
+        return redirect()->route('projects.show', $copy)
+            ->with('success', 'Project duplicated successfully!');
     }
 }
